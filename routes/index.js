@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var xpubLib = require("@swan-bitcoin/xpub-lib");
+const fetch = require('node-fetch');
 
 /* GET home page. */
 // https://mybitprices.info/hdreport.html?report=a30c30dee88b8181900509248376ff7a
@@ -25,27 +26,30 @@ var xpubLib = require("@swan-bitcoin/xpub-lib");
 // | 18EmV6cYjVmK3SQshZc92CdD9ByHDdf39v | Change  |     0.00068640 | 0.00000000 | 0.00068640 | 1/2     |
 // +------------------------------------+---------+----------------+------------+------------+---------+
 
-router.get('/', function(req, res, next) {
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+router.get('/', async (req, res, next) => {
   const key = 'xpub6BfKpqjTwvH21wJGWEfxLppb8sU7C6FJge2kWb9315oP4ZVqCXG29cdUtkyu7YQhHyfA5nt63nzcNZHYmqXYHDxYo8mm1Xq1dAC7YtodwUR';
-  // var node = bitcoin.bip32.fromBase58(
-  //   xpub,
-  //   bitcoin.networks.bitcoin
-  // );
-  // let chain = new bip32utils.Chain(node);
-
-  // for (var i = 0; i <= 100; i++) {
-  //   var address = bitcoin.payments.p2pkh({ pubkey: node.derive(i).publicKey, network: bitcoin.networks.bitcoin}).address;
-  //   console.log(address);
-  // }
-
   let addrs = xpubLib.addressesFromExtPubKey({
     extPubKey: key,
     network: 'mainnet',
     purpose: xpubLib.Purpose.P2PKH,
-    addressCount: 100
+    addressCount: 10
   });
-  console.log(addrs);
+  // console.log(addrs);
+  let amount_in_sats = 0;
+  await asyncForEach(addrs, async (addr) => {
+    query = 'https://blockstream.info/api/address/' + addr['address'];
+    const data = await fetch(query).then((data) => { return data.json(); });
+    console.log(data['chain_stats']);
+    amount_in_sats += data['chain_stats']['funded_txo_sum'] - data['chain_stats']['spent_txo_sum'];
+  });
 
+  console.log(amount_in_sats);
   res.render('index', { title: 'xpub reader', xpub: key });
 });
 
