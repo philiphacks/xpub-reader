@@ -1,0 +1,44 @@
+# Temporary files
+!.keep
+*.DS_Store
+*.swo
+*.swp
+/dump.rdb
+*~
+\#*\#
+.\#*
+
+# ENV files
+/.env
+/.env.test.local
+/storage/*
+!/storage/.keep
+/config/master.key
+/.idea
+# Foreman
+/.foreman
+Procfile
+
+# Logs
+/log/*
+
+# Tags for Editors
+/tags
+/tmp/*
+.tags
+.gemtags
+
+# IRB and other tool's history
+.byebug_history
+
+# Yarn and Node
+node_modules
+/frontend/node_modules
+/frontend/bower_components
+/frontend/yarn-error.log
+
+# Vim Session stuff
+Session.vim
+
+# VSCode project settings
+.vscode
